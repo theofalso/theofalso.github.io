@@ -1,0 +1,1259 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nombre juego - Premium</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&family=Playfair+Display:wght@700&display=swap');
+        
+        :root {
+            --primary: #ff2d75;
+            --secondary: #ff7aa8;
+            --dark: #1a1a2e;
+            --light: #fef6f6;
+        }
+        
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: var(--dark);
+            color: var(--light);
+            overflow-x: hidden;
+        }
+        
+        .title-font {
+            font-family: 'Playfair Display', serif;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .game-container {
+            background-size: cover;
+            background-position: center;
+            border-radius: 16px;
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5);
+            padding: 1.5rem;
+            position: relative;
+            overflow: hidden;
+            border: 2px solid rgba(255,255,255,0.1);
+        }
+        
+        .game-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(26, 26, 46, 0.7);
+            z-index: 0;
+        }
+        
+        .card {
+            perspective: 1000px;
+            transition: all 0.3s ease;
+            z-index: 1;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+        
+        .card-inner {
+            transform-style: preserve-3d;
+            transition: transform 0.5s cubic-bezier(0.4, 0.0, 0.2, 1);
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+        
+        .card.flipped .card-inner {
+            transform: rotateY(180deg);
+        }
+        
+        .card-front, .card-back {
+            backface-visibility: hidden;
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 6px 15px rgba(0,0,0,0.2);
+        }
+        
+        .card-front {
+            transform: rotateY(180deg);
+            background: linear-gradient(135deg, #ffffff, #f8f8f8);
+            border: 2px solid rgba(255,255,255,0.8);
+        }
+        
+        .card-back {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border: 2px solid rgba(255,255,255,0.3);
+        }
+        
+        .card-back::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('https://www.transparenttextures.com/patterns/cardboard.png');
+            opacity: 0.1;
+            border-radius: 10px;
+        }
+        
+        .matched {
+            visibility: hidden;
+            opacity: 0;
+            transform: scale(0.8);
+            transition: all 0.5s ease;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        .pulse {
+            animation: pulse 1s infinite;
+        }
+        
+        .heart-beat {
+            animation: heartBeat 1.5s infinite;
+        }
+        
+        @keyframes heartBeat {
+            0% { transform: scale(1); }
+            25% { transform: scale(1.1); }
+            50% { transform: scale(1); }
+            75% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        
+        .btn-premium {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border: none;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(255, 45, 117, 0.4);
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            font-size: 0.9rem;
+        }
+        
+        .btn-premium:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 45, 117, 0.6);
+            background: linear-gradient(135deg, var(--secondary), var(--primary));
+        }
+        
+        .btn-secondary {
+            background: rgba(255,255,255,0.1);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.2);
+            transition: all 0.3s;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            font-size: 0.9rem;
+        }
+        
+        .btn-secondary:hover {
+            background: rgba(255,255,255,0.2);
+            transform: translateY(-2px);
+        }
+        
+        .menu-option {
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        
+        .menu-option:hover {
+            transform: scale(1.05);
+        }
+        
+        .rose-petal {
+            position: absolute;
+            background-size: contain;
+            background-repeat: no-repeat;
+            opacity: 0.7;
+            z-index: -1;
+            pointer-events: none;
+        }
+        
+        .level-selector {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+        
+        .level-btn {
+            aspect-ratio: 1/1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+            font-weight: bold;
+            font-size: 1.8rem;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+            border: 2px solid transparent;
+        }
+        
+        .level-btn.unlocked {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            cursor: pointer;
+            box-shadow: 0 6px 15px rgba(255, 45, 117, 0.3);
+        }
+        
+        .level-btn.unlocked:hover {
+            transform: scale(1.05) rotate(5deg);
+            box-shadow: 0 8px 20px rgba(255, 45, 117, 0.5);
+        }
+        
+        .level-btn.locked {
+            background: rgba(255,255,255,0.05);
+            color: rgba(255,255,255,0.3);
+            cursor: not-allowed;
+            border: 2px dashed rgba(255,255,255,0.1);
+        }
+        
+        .level-btn.current {
+            border: 2px solid white;
+            box-shadow: 0 0 0 3px var(--primary), 0 8px 25px rgba(255, 45, 117, 0.5);
+            animation: pulse 1.5s infinite;
+        }
+        
+        .level-btn.unlocked::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(
+                to bottom right,
+                rgba(255,255,255,0) 0%,
+                rgba(255,255,255,0.1) 50%,
+                rgba(255,255,255,0) 100%
+            );
+            transform: rotate(45deg);
+            animation: shine 3s infinite;
+        }
+        
+        @keyframes shine {
+            0% { transform: rotate(45deg) translate(-30%, -30%); }
+            100% { transform: rotate(45deg) translate(30%, 30%); }
+        }
+        
+        .main-menu {
+            background-image: url('https://i.ytimg.com/vi/GYnN5ml98GA/hq720.jpg?sqp=-oaymwEhCK4FEIIDSFryq4qpAxMIARUAAAAAGAElAADIQj0AgKJD&rs=AOn4CLB-q544_u-EDihC1b9E-zPmIV4cwg');
+            background-size: cover;
+            background-position: center;
+        }
+        
+        .menu-overlay {
+            background: rgba(26, 26, 46, 0.85);
+            backdrop-filter: blur(10px);
+        }
+        
+        .gallery-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 2rem;
+            padding: 1rem;
+        }
+        
+        .gallery-item {
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+            transition: all 0.4s cubic-bezier(0.4, 0.0, 0.2, 1);
+            aspect-ratio: 16/9;
+            background-size: cover;
+            background-position: center;
+            position: relative;
+            border: 2px solid rgba(255,255,255,0.1);
+        }
+        
+        .gallery-item:hover {
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+            border-color: rgba(255,255,255,0.3);
+        }
+        
+        .gallery-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.3) 100%);
+            transition: background 0.3s;
+        }
+        
+        .gallery-item:hover::before {
+            background: linear-gradient(to top, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.2) 100%);
+        }
+        
+        .gallery-item .level-info {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 1.5rem;
+            color: white;
+            text-align: left;
+            z-index: 2;
+        }
+        
+        .gallery-item .level-number {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: var(--secondary);
+        }
+        
+        .gallery-item .level-desc {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+        
+        .win-message-container {
+            background: linear-gradient(135deg, var(--dark), #2a2a4a);
+            border-radius: 16px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.5);
+            border: 2px solid rgba(255,255,255,0.1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .win-message-container::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(
+                to bottom right,
+                rgba(255,255,255,0) 0%,
+                rgba(255,255,255,0.03) 50%,
+                rgba(255,255,255,0) 100%
+            );
+            transform: rotate(45deg);
+            animation: shine 6s infinite;
+        }
+        
+        .ribbon {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 150px;
+            height: 150px;
+            overflow: hidden;
+        }
+        
+        .ribbon-content {
+            position: absolute;
+            display: block;
+            width: 225px;
+            padding: 15px 0;
+            background-color: var(--primary);
+            box-shadow: 0 5px 10px rgba(0,0,0,0.1);
+            color: #fff;
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            text-align: center;
+            right: -25px;
+            top: 30px;
+            transform: rotate(45deg);
+        }
+        
+        .game-header {
+            background: rgba(26, 26, 46, 0.7);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 1rem;
+            border: 1px solid rgba(255,255,255,0.1);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        
+        .stat-box {
+            background: rgba(255,255,255,0.1);
+            border-radius: 8px;
+            padding: 0.5rem 1rem;
+            min-width: 80px;
+            text-align: center;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        
+        .card-icon {
+            font-size: 2.5rem;
+            color: var(--primary);
+            text-shadow: 0 2px 3px rgba(0,0,0,0.2);
+        }
+        
+        /* Image Viewer */
+        .image-viewer {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+        
+        .image-viewer.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+        
+        .image-viewer-content {
+            position: relative;
+            max-width: 90%;
+            max-height: 90%;
+        }
+        
+        .image-viewer img {
+            max-width: 100%;
+            max-height: 90vh;
+            border-radius: 8px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+        
+        .close-viewer {
+            position: absolute;
+            top: -40px;
+            right: 0;
+            background: var(--primary);
+            color: white;
+            border: none;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: all 0.3s;
+        }
+        
+        .close-viewer:hover {
+            transform: scale(1.1);
+            background: var(--secondary);
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .level-selector {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 1rem;
+            }
+            
+            .gallery-container {
+                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+                gap: 1rem;
+            }
+            
+            .card-icon {
+                font-size: 2rem;
+            }
+            
+            .game-header {
+                flex-wrap: wrap;
+                gap: 0.5rem;
+            }
+            
+            .stat-box {
+                min-width: 70px;
+                padding: 0.3rem 0.6rem;
+                font-size: 0.8rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .level-selector {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .card-icon {
+                font-size: 1.8rem;
+            }
+        }
+    </style>
+</head>
+<body class="flex flex-col items-center justify-center min-h-screen p-4">
+    <!-- Main Menu -->
+    <div id="main-menu" class="fixed inset-0 flex items-center justify-center z-50">
+        <div class="main-menu absolute inset-0"></div>
+        <div class="menu-overlay absolute inset-0"></div>
+        <div class="relative bg-white/5 backdrop-blur-md rounded-2xl p-8 max-w-2xl w-full mx-4 text-center border border-white/10">
+            <div class="absolute -top-2 -right-2 w-16 h-16 bg-rose-600 rounded-full flex items-center justify-center shadow-lg">
+                <span class="text-white font-bold text-xl">♥</span>
+            </div>
+            
+            <h1 class="text-5xl font-bold text-white mb-2 title-font"> Nombre juego</h1>
+            <p class="text-white/80 mb-8 text-lg">putaso el q lee</p>
+            
+            <div class="flex flex-col space-y-4">
+                <button id="play-game" class="btn-premium px-8 py-4 rounded-xl text-lg">
+                    <i class="fas fa-play mr-2"></i>New Game
+                </button>
+                <button id="view-gallery" class="btn-secondary px-8 py-4 rounded-xl text-lg">
+                    <i class="fas fa-images mr-2"></i>Memory Gallery
+                </button>
+                <button id="how-to-play" class="btn-secondary px-8 py-4 rounded-xl text-lg">
+                    <i class="fas fa-question-circle mr-2"></i>How to Play
+                </button>
+                <button id="continue-game" class="btn-secondary px-8 py-4 rounded-xl text-lg">
+                    <i class="fas fa-play mr-2"></i>Continue Game
+                </button>
+            </div>
+            
+            <div class="mt-8 text-white/60 text-sm">
+                <p>© theofalso</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Level Selector -->
+    <div id="level-selector" class="fixed inset-0 bg-black/90 flex items-center justify-center z-50 hidden overflow-y-auto py-8">
+        <div class="relative bg-white/5 backdrop-blur-md rounded-2xl p-8 max-w-4xl w-full mx-4 text-center border border-white/10">
+            <h2 class="text-3xl font-bold text-white mb-6 title-font">Select Your Level</h2>
+            <p class="text-white/70 mb-6">Complete levels to unlock Nombre juego memories</p>
+            
+            <div class="level-selector">
+                <!-- Levels will be generated here -->
+            </div>
+            
+            <button id="back-to-main" class="btn-premium px-6 py-3 rounded-xl mt-6">
+                <i class="fas fa-arrow-left mr-2"></i>Back to Menu
+            </button>
+        </div>
+    </div>
+    
+    <!-- Gallery -->
+    <div id="gallery" class="fixed inset-0 bg-black/90 flex items-center justify-center z-50 hidden overflow-y-auto py-8">
+        <div class="relative bg-white/5 backdrop-blur-md rounded-2xl p-8 max-w-6xl w-full mx-4 text-center border border-white/10">
+            <h2 class="text-3xl font-bold text-white mb-6 title-font">Poner algo</h2>
+            <p class="text-white/70 mb-6">Poner algo 2</p>
+            
+            <div class="gallery-container" id="gallery-items">
+                <!-- Gallery items will be generated here -->
+            </div>
+            
+            <button id="back-to-main-gallery" class="btn-premium px-6 py-3 rounded-xl mt-8">
+                <i class="fas fa-arrow-left mr-2"></i>Back to Menu
+            </button>
+        </div>
+    </div>
+    
+    <!-- Instructions -->
+    <div id="instructions" class="fixed inset-0 bg-black/90 flex items-center justify-center z-50 hidden">
+        <div class="bg-gradient-to-br from-gray-900 to-gray-800 backdrop-blur-sm rounded-2xl p-8 max-w-md w-full mx-4 border border-white/10">
+            <h2 class="text-2xl font-bold text-white mb-6 title-font">How to Play</h2>
+            
+            <div class="bg-white/5 rounded-xl p-4 mb-6 border border-white/10">
+                <ul class="space-y-4 text-white/90">
+                    <li class="flex items-start">
+                        <div class="bg-rose-600/80 rounded-full w-6 h-6 flex items-center justify-center mr-3 mt-0.5">
+                            <i class="fas fa-heart text-white text-xs"></i>
+                        </div>
+                        <span>Click on cards to flip them and find matching pairs</span>
+                    </li>
+                    <li class="flex items-start">
+                        <div class="bg-rose-600/80 rounded-full w-6 h-6 flex items-center justify-center mr-3 mt-0.5">
+                            <i class="fas fa-heart text-white text-xs"></i>
+                        </div>
+                        <span>You can only flip two cards at a time</span>
+                    </li>
+                    <li class="flex items-start">
+                        <div class="bg-rose-600/80 rounded-full w-6 h-6 flex items-center justify-center mr-3 mt-0.5">
+                            <i class="fas fa-heart text-white text-xs"></i>
+                        </div>
+                        <span>If cards match, they will disappear from the board</span>
+                    </li>
+                    <li class="flex items-start">
+                        <div class="bg-rose-600/80 rounded-full w-6 h-6 flex items-center justify-center mr-3 mt-0.5">
+                            <i class="fas fa-heart text-white text-xs"></i>
+                        </div>
+                        <span>If they don't match, they will flip back</span>
+                    </li>
+                    <li class="flex items-start">
+                        <div class="bg-rose-600/80 rounded-full w-6 h-6 flex items-center justify-center mr-3 mt-0.5">
+                            <i class="fas fa-heart text-white text-xs"></i>
+                        </div>
+                        <span>Find all pairs to unlock a Nombre juego memory!</span>
+                    </li>
+                </ul>
+            </div>
+            
+            <button id="back-to-menu" class="btn-premium px-6 py-3 rounded-xl w-full">
+                <i class="fas fa-arrow-left mr-2"></i>Back to Menu
+            </button>
+        </div>
+    </div>
+    
+    <!-- Game Screen -->
+    <div id="game-screen" class="w-full max-w-6xl hidden">
+        <div class="game-header flex justify-between items-center mb-6 flex-wrap gap-2">
+            <div class="flex items-center space-x-2">
+                <div class="stat-box">
+                    <div class="text-white/70 text-xs">Level</div>
+                    <div class="text-white font-bold" id="current-level">1</div>
+                </div>
+                <div class="stat-box">
+                    <div class="text-white/70 text-xs">Pairs</div>
+                    <div class="text-white font-bold"><span id="pairs">0</span>/<span id="total-pairs">0</span></div>
+                </div>
+                <div class="stat-box">
+                    <div class="text-white/70 text-xs">Moves</div>
+                    <div class="text-white font-bold" id="moves">0</div>
+                </div>
+            </div>
+            
+            <div class="flex items-center space-x-2">
+                <button id="restart" class="btn-secondary px-3 py-2 rounded-lg text-sm">
+                    <i class="fas fa-redo mr-1"></i>Restart
+                </button>
+                <button id="menu-btn" class="btn-secondary px-3 py-2 rounded-lg text-sm">
+                    <i class="fas fa-home mr-1"></i>Menu
+                </button>
+                <button id="save-game" class="btn-premium px-3 py-2 rounded-lg text-sm">
+                    <i class="fas fa-save mr-1"></i>Save
+                </button>
+            </div>
+        </div>
+
+        <div class="game-container w-full min-h-[500px]">
+            <div class="grid gap-3 sm:gap-4 relative z-10" id="game-board">
+                <!-- Cards will be generated here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Win Message -->
+    <div id="win-message" class="fixed inset-0 bg-black/90 flex items-center justify-center hidden z-50">
+        <div class="win-message-container p-8 sm:p-10 max-w-md mx-4 text-center">
+            <div class="ribbon">
+                <span class="ribbon-content">Completed!</span>
+            </div>
+            
+            <div class="mb-6">
+                <div class="w-20 h-20 bg-rose-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
+                    <i class="fas fa-trophy text-white text-3xl"></i>
+                </div>
+                <h2 class="text-3xl font-bold text-white mb-2 title-font">Perfect!</h2>
+                <p class="text-white mb-1">You found all pairs in</p>
+                <p class="text-2xl font-bold text-rose-400 mb-4"><span id="final-moves">0</span> moves!</p>
+                
+                <!-- Next level unlock message -->
+                <div id="next-level-message" class="bg-white/10 rounded-lg p-3 mb-4 border border-white/10 hidden">
+                    <p class="text-white">
+                        <i class="fas fa-lock-open text-rose-400 mr-2"></i>Level <span id="next-level-number">2</span> unlocked!
+                    </p>
+                </div>
+            </div>
+            
+            <div class="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-4 justify-center">
+                <button id="play-again" class="btn-premium px-6 py-3 rounded-xl flex-1">
+                    <i class="fas fa-redo mr-2"></i>Play Again
+                </button>
+                <button id="next-level" class="btn-premium px-6 py-3 rounded-xl flex-1">
+                    <i class="fas fa-arrow-right mr-2"></i>Next Level
+                </button>
+                <button id="back-to-menu-win" class="btn-secondary px-6 py-3 rounded-xl flex-1">
+                    <i class="fas fa-home mr-2"></i>Menu
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Image Viewer -->
+    <div id="image-viewer" class="image-viewer">
+        <div class="image-viewer-content">
+            <button class="close-viewer">
+                <i class="fas fa-times"></i>
+            </button>
+            <img id="viewer-image" src="" alt="Full size memory">
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // DOM Elements
+            const mainMenu = document.getElementById('main-menu');
+            const levelSelector = document.getElementById('level-selector');
+            const gallery = document.getElementById('gallery');
+            const gameScreen = document.getElementById('game-screen');
+            const instructions = document.getElementById('instructions');
+            const gameBoard = document.getElementById('game-board');
+            const pairsDisplay = document.getElementById('pairs');
+            const totalPairsDisplay = document.getElementById('total-pairs');
+            const movesDisplay = document.getElementById('moves');
+            const currentLevelDisplay = document.getElementById('current-level');
+            const restartBtn = document.getElementById('restart');
+            const menuBtn = document.getElementById('menu-btn');
+            const saveGameBtn = document.getElementById('save-game');
+            const winMessage = document.getElementById('win-message');
+            const finalMoves = document.getElementById('final-moves');
+            const playAgainBtn = document.getElementById('play-again');
+            const nextLevelBtn = document.getElementById('next-level');
+            const backToMenuWin = document.getElementById('back-to-menu-win');
+            const howToPlayBtn = document.getElementById('how-to-play');
+            const backToMenuBtn = document.getElementById('back-to-menu');
+            const continueBtn = document.getElementById('continue-game');
+            const nextLevelMessage = document.getElementById('next-level-message');
+            const nextLevelNumber = document.getElementById('next-level-number');
+            const levelSelectorContainer = document.querySelector('#level-selector .level-selector');
+            const playGameBtn = document.getElementById('play-game');
+            const viewGalleryBtn = document.getElementById('view-gallery');
+            const backToMainBtn = document.getElementById('back-to-main');
+            const backToMainGalleryBtn = document.getElementById('back-to-main-gallery');
+            const galleryItemsContainer = document.getElementById('gallery-items');
+            const imageViewer = document.getElementById('image-viewer');
+            const viewerImage = document.getElementById('viewer-image');
+            const closeViewerBtn = document.querySelector('.close-viewer');
+            
+            // Premium Nombre juego icons for cards (using Font Awesome 6)
+            const romanticIcons = [
+                'heart', 'heart-crack', 'heart-pulse', 'hands-heart',
+                'ring', 'gem', 'crown', 'star',
+                'moon', 'sun', 'cloud', 'umbrella',
+                'champagne-glasses', 'cake', 'gift', 'music',
+                'envelope', 'love-letter', 'book', 'pen-fancy',
+                'camera', 'image', 'palette', 'mask',
+                'lock', 'key', 'infinity', 'atom',
+                'mountain', 'tree', 'feather', 'fish',
+                'dove', 'cat', 'dog', 'horse',
+                'car', 'bicycle', 'ship', 'plane',
+                'hotel', 'spa', 'massage', 'couch',
+                'bed', 'bath', 'shower', 'toilet-paper',
+                'tshirt', 'hat-cowboy', 'glasses', 'shoe-prints'
+            ];
+            
+            // Game variables
+            let cards = [];
+            let hasFlippedCard = false;
+            let lockBoard = false;
+            let firstCard, secondCard;
+            let pairsFound = 0;
+            let moves = 0;
+            let totalPairs = 0;
+            let currentLevel = 1;
+            let maxUnlockedLevel = 1;
+            let cardIcons = [];
+            let gameState = {};
+            let completedLevels = [];
+            
+            // 10 levels with increasing difficulty
+            const levels = [
+                { cols: 4, rows: 3, pairs: 6 },    // Level 1
+                { cols: 4, rows: 4, pairs: 8 },    // Level 2
+                { cols: 4, rows: 5, pairs: 10 },   // Level 3
+                { cols: 5, rows: 4, pairs: 10 },   // Level 4
+                { cols: 5, rows: 5, pairs: 12 },    // Level 5
+                { cols: 5, rows: 6, pairs: 15 },    // Level 6
+                { cols: 6, rows: 5, pairs: 15 },    // Level 7
+                { cols: 6, rows: 6, pairs: 18 },    // Level 8
+                { cols: 6, rows: 7, pairs: 21 },    // Level 9
+                { cols: 7, rows: 7, pairs: 24 }      // Level 10
+            ];
+            
+            // High-quality Nombre juegoimages for each level
+            const levelImages = [
+                'https://c.files.bbci.co.uk/e768/live/454120a0-e582-11ef-a57f-1b15b3ba612a.jpg', // Level 1
+                'https://media.discordapp.net/attachments/561302956683821068/1377341834824777798/GfVLsONX0AANS6w.png?ex=68389d0b&is=68374b8b&hm=576c105636dc8ef87cdda1488e70c77eb0ed210aaa445a08efba67991a3cbe59&=&format=webp&quality=lossless&width=701&height=968', // Level 2
+                'https://cassette.sphdigital.com.sg/image/straitstimes/95f88ca6f128773244fbac11ecf123a7e624a96b9d852dc07c9b371a83c84393', // Level 3
+                'https://i.ytimg.com/vi/Y2R-GrI3K48/maxresdefault.jpg', // Level 4
+                'https://media.discordapp.net/attachments/561302956683821068/1377341834824777798/GfVLsONX0AANS6w.png?ex=68389d0b&is=68374b8b&hm=576c105636dc8ef87cdda1488e70c77eb0ed210aaa445a08efba67991a3cbe59&=&format=webp&quality=lossless&width=701&height=968', // Level 5
+                'https://dynaimage.cdn.cnn.com/cnn/w_768,h_1024,c_scale/https%3A%2F%2Fdynaimage.cdn.cnn.com%2Fcnn%2Fx_156%2Cy_210%2Cw_1209%2Ch_1612%2Cc_crop%2Fhttps%253A%252F%252Fstamp.static.cnn.io%252F5bae1c384db3d70020c01c40%252FfireflyWolfy.jpg', // Level 6
+                'https://cassette.sphdigital.com.sg/image/straitstimes/95f88ca6f128773244fbac11ecf123a7e624a96b9d852dc07c9b371a83c84393', // Level 7
+                'https://cassette.sphdigital.com.sg/image/straitstimes/95f88ca6f128773244fbac11ecf123a7e624a96b9d852dc07c9b371a83c84393', // Level 8
+                'https://cassette.sphdigital.com.sg/image/straitstimes/95f88ca6f128773244fbac11ecf123a7e624a96b9d852dc07c9b371a83c84393', // Level 9
+                'https://cassette.sphdigital.com.sg/image/straitstimes/95f88ca6f128773244fbac11ecf123a7e624a96b9d852dc07c9b371a83c84393'  // Level 10
+            ];
+            
+            // Level descriptions for gallery
+            const levelDescriptions = [
+                "titulo descripcion - descripcion",
+                "titulo descripcion - descripcion",
+                "titulo descripcion - descripcion",
+                "titulo descripcion - descripcion",
+                "titulo descripcion - descripcion",
+                "titulo descripcion - descripcion",
+                "titulo descripcion - descripcion",
+                "titulo descripcion - descripcion",
+                "titulo descripcion - descripcion",
+                "titulo descripcion - descripcion"
+            ];
+            
+            // Initialize the game
+            function initGame() {
+                loadGameState();
+                
+                // Event listeners
+                playGameBtn.addEventListener('click', () => {
+                    mainMenu.classList.add('hidden');
+                    levelSelector.classList.remove('hidden');
+                    createLevelSelector();
+                });
+                
+                viewGalleryBtn.addEventListener('click', () => {
+                    mainMenu.classList.add('hidden');
+                    gallery.classList.remove('hidden');
+                    createGalleryItems();
+                });
+                
+                howToPlayBtn.addEventListener('click', () => {
+                    mainMenu.classList.add('hidden');
+                    instructions.classList.remove('hidden');
+                });
+                
+                backToMenuBtn.addEventListener('click', () => {
+                    instructions.classList.add('hidden');
+                    mainMenu.classList.remove('hidden');
+                });
+                
+                backToMainBtn.addEventListener('click', () => {
+                    levelSelector.classList.add('hidden');
+                    mainMenu.classList.remove('hidden');
+                });
+                
+                backToMainGalleryBtn.addEventListener('click', () => {
+                    gallery.classList.add('hidden');
+                    mainMenu.classList.remove('hidden');
+                });
+                
+                menuBtn.addEventListener('click', () => {
+                    gameScreen.classList.add('hidden');
+                    mainMenu.classList.remove('hidden');
+                });
+                
+                backToMenuWin.addEventListener('click', () => {
+                    winMessage.classList.add('hidden');
+                    gameScreen.classList.add('hidden');
+                    mainMenu.classList.remove('hidden');
+                });
+                
+                playAgainBtn.addEventListener('click', () => {
+                    winMessage.classList.add('hidden');
+                    startGame(currentLevel);
+                });
+                
+                nextLevelBtn.addEventListener('click', () => {
+                    winMessage.classList.add('hidden');
+                    currentLevel++;
+                    if (currentLevel > maxUnlockedLevel) {
+                        maxUnlockedLevel = currentLevel;
+                        saveGameState();
+                    }
+                    startGame(currentLevel);
+                });
+                
+                restartBtn.addEventListener('click', createCards);
+                
+                saveGameBtn.addEventListener('click', saveCurrentGame);
+                
+                continueBtn.addEventListener('click', () => {
+                    if (gameState.level && gameState.pairsFound) {
+                        continueGame();
+                    }
+                });
+                
+                // Image viewer events
+                closeViewerBtn.addEventListener('click', () => {
+                    imageViewer.classList.remove('active');
+                });
+                
+                // Create rose petals animation
+                createRosePetals();
+            }
+            
+            // Create level selector buttons
+            function createLevelSelector() {
+                levelSelectorContainer.innerHTML = '';
+                
+                for (let i = 1; i <= 10; i++) {
+                    const levelBtn = document.createElement('div');
+                    levelBtn.className = `level-btn ${i <= maxUnlockedLevel ? 'unlocked' : 'locked'}`;
+                    if (i === currentLevel && i <= maxUnlockedLevel) {
+                        levelBtn.classList.add('current');
+                    }
+                    levelBtn.textContent = i;
+                    levelBtn.dataset.level = i;
+                    
+                    if (i <= maxUnlockedLevel) {
+                        levelBtn.addEventListener('click', () => {
+                            currentLevel = i;
+                            startGame(currentLevel);
+                            levelSelector.classList.add('hidden');
+                            gameScreen.classList.remove('hidden');
+                        });
+                    }
+                    
+                    levelSelectorContainer.appendChild(levelBtn);
+                }
+            }
+            
+            // Create gallery items for completed levels
+            function createGalleryItems() {
+                galleryItemsContainer.innerHTML = '';
+                
+                for (let i = 1; i <= 10; i++) {
+                    const isCompleted = completedLevels.includes(i);
+                    
+                    const galleryItem = document.createElement('div');
+                    galleryItem.className = 'gallery-item';
+                    
+                    if (isCompleted) {
+                        galleryItem.style.backgroundImage = `url('${levelImages[i-1]}')`;
+                        galleryItem.style.cursor = 'pointer';
+                        
+                        const levelInfo = document.createElement('div');
+                        levelInfo.className = 'level-info';
+                        
+                        const levelNumber = document.createElement('div');
+                        levelNumber.className = 'level-number';
+                        levelNumber.textContent = `Level ${i}`;
+                        
+                        const levelDesc = document.createElement('div');
+                        levelDesc.className = 'level-desc';
+                        levelDesc.textContent = levelDescriptions[i-1];
+                        
+                        levelInfo.appendChild(levelNumber);
+                        levelInfo.appendChild(levelDesc);
+                        galleryItem.appendChild(levelInfo);
+                        
+                        // Add click event to view full image
+                        galleryItem.addEventListener('click', () => {
+                            viewerImage.src = levelImages[i-1];
+                            imageViewer.classList.add('active');
+                        });
+                    } else {
+                        galleryItem.style.backgroundImage = 'linear-gradient(135deg, #2a2a4a, #1a1a2e)';
+                        
+                        const lockIcon = document.createElement('div');
+                        lockIcon.className = 'absolute inset-0 flex items-center justify-center';
+                        lockIcon.innerHTML = '<i class="fas fa-lock text-white/30 text-4xl"></i>';
+                        
+                        galleryItem.appendChild(lockIcon);
+                    }
+                    
+                    galleryItemsContainer.appendChild(galleryItem);
+                }
+            }
+            
+            // Start a new game at specified level
+            function startGame(levelIndex) {
+                const level = levels[levelIndex - 1];
+                currentLevel = levelIndex;
+                currentLevelDisplay.textContent = currentLevel;
+                
+                // Set game board background for this level
+                document.querySelector('.game-container').style.backgroundImage = `url('${levelImages[levelIndex - 1]}')`;
+                
+                // Select random icons for this level
+                const shuffledIcons = [...romanticIcons].sort(() => 0.5 - Math.random()).slice(0, level.pairs);
+                cardIcons = [...shuffledIcons, ...shuffledIcons];
+                totalPairs = level.pairs;
+                totalPairsDisplay.textContent = totalPairs;
+                
+                // Configure the board
+                gameBoard.innerHTML = '';
+                gameBoard.className = `grid gap-3 sm:gap-4 relative z-10`;
+                gameBoard.style.gridTemplateColumns = `repeat(${level.cols}, minmax(0, 1fr))`;
+                
+                // Create cards
+                createCards();
+                
+                // Show game screen
+                gameScreen.classList.remove('hidden');
+            }
+            
+            // Continue a saved game
+            function continueGame() {
+                currentLevel = gameState.level;
+                startGame(currentLevel);
+                
+                // Restore game state
+                setTimeout(() => {
+                    pairsFound = gameState.pairsFound;
+                    moves = gameState.moves;
+                    pairsDisplay.textContent = pairsFound;
+                    movesDisplay.textContent = moves;
+                    
+                    // Mark matched cards
+                    const allCards = document.querySelectorAll('.card');
+                    gameState.matchedCards.forEach(index => {
+                        allCards[index].classList.add('matched');
+                    });
+                    
+                    // If game was already won
+                    if (pairsFound === totalPairs) {
+                        finalMoves.textContent = moves;
+                        winMessage.classList.remove('hidden');
+                    }
+                }, 100);
+            }
+            
+            // Create cards for the current game
+            function createCards() {
+                gameBoard.innerHTML = '';
+                cards = [];
+                pairsFound = 0;
+                moves = 0;
+                pairsDisplay.textContent = '0';
+                movesDisplay.textContent = '0';
+                
+                const shuffledIcons = shuffleArray([...cardIcons]);
+                
+                shuffledIcons.forEach((icon, index) => {
+                    const card = document.createElement('div');
+                    card.classList.add('card', 'aspect-square');
+                    card.dataset.icon = icon;
+                    card.dataset.index = index;
+                    
+                    card.innerHTML = `
+                        <div class="card-inner">
+                            <div class="card-back flex items-center justify-center">
+                                <i class="fas fa-heart text-white text-4xl sm:text-5xl"></i>
+                            </div>
+                            <div class="card-front">
+                                <i class="fas fa-${icon} card-icon"></i>
+                            </div>
+                        </div>
+                    `;
+                    
+                    card.addEventListener('click', flipCard);
+                    gameBoard.appendChild(card);
+                    cards.push(card);
+                });
+            }
+            
+            // Shuffle array
+            function shuffleArray(array) {
+                for (let i = array.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [array[i], array[j]] = [array[j], array[i]];
+                }
+                return array;
+            }
+            
+            // Flip card
+            function flipCard() {
+                if (lockBoard) return;
+                if (this === firstCard) return;
+                if (this.classList.contains('matched')) return;
+                
+                this.classList.add('flipped');
+                
+                if (!hasFlippedCard) {
+                    // First click
+                    hasFlippedCard = true;
+                    firstCard = this;
+                    return;
+                }
+                
+                // Second click
+                secondCard = this;
+                moves++;
+                movesDisplay.textContent = moves;
+                
+                checkForMatch();
+            }
+            
+            // Check if cards match
+            function checkForMatch() {
+                const isMatch = firstCard.dataset.icon === secondCard.dataset.icon;
+                
+                if (isMatch) {
+                    disableCards();
+                    pairsFound++;
+                    pairsDisplay.textContent = pairsFound;
+                    
+                    if (pairsFound === totalPairs) {
+                        // Mark level as completed
+                        if (!completedLevels.includes(currentLevel)) {
+                            completedLevels.push(currentLevel);
+                            saveGameState();
+                        }
+                        
+                        // Check if this unlocks a new level
+                        if (currentLevel === maxUnlockedLevel && currentLevel < 10) {
+                            nextLevelNumber.textContent = currentLevel + 1;
+                            nextLevelMessage.classList.remove('hidden');
+                            maxUnlockedLevel = currentLevel + 1;
+                            saveGameState(); // Auto-save when completing a level
+                        }
+                        
+                        setTimeout(() => {
+                            finalMoves.textContent = moves;
+                            winMessage.classList.remove('hidden');
+                        }, 800);
+                    }
+                } else {
+                    unflipCards();
+                }
+            }
+            
+            // Disable matched cards
+            function disableCards() {
+                firstCard.classList.add('matched');
+                secondCard.classList.add('matched');
+                
+                resetBoard();
+            }
+            
+            // Unflip unmatched cards
+            function unflipCards() {
+                lockBoard = true;
+                
+                setTimeout(() => {
+                    firstCard.classList.remove('flipped');
+                    secondCard.classList.remove('flipped');
+                    
+                    resetBoard();
+                }, 800);
+            }
+            
+            // Reset board state
+            function resetBoard() {
+                [hasFlippedCard, lockBoard] = [false, false];
+                [firstCard, secondCard] = [null, null];
+            }
+            
+            // Save current game state
+            function saveCurrentGame() {
+                const matchedCards = [];
+                document.querySelectorAll('.card').forEach((card, index) => {
+                    if (card.classList.contains('matched')) {
+                        matchedCards.push(index);
+                    }
+                });
+                
+                gameState = {
+                    level: currentLevel,
+                    pairsFound: pairsFound,
+                    moves: moves,
+                    totalPairs: totalPairs,
+                    matchedCards: matchedCards,
+                    maxUnlockedLevel: maxUnlockedLevel,
+                    completedLevels: completedLevels
+                };
+                
+                localStorage.setItem('romanticMemoryGame', JSON.stringify(gameState));
+                
+                // Show save confirmation
+                const saveBtnText = saveGameBtn.innerHTML;
+                saveGameBtn.innerHTML = '<i class="fas fa-check mr-1"></i>Saved!';
+                setTimeout(() => {
+                    saveGameBtn.innerHTML = saveBtnText;
+                }, 2000);
+            }
+            
+            // Save overall game progress
+            function saveGameState() {
+                const gameState = {
+                    maxUnlockedLevel: maxUnlockedLevel,
+                    currentLevel: currentLevel,
+                    completedLevels: completedLevels
+                };
+                
+                localStorage.setItem('romanticMemoryProgress', JSON.stringify(gameState));
+            }
+            
+            // Load saved game state
+            function loadGameState() {
+                // Load progress
+                const progress = localStorage.getItem('romanticMemoryProgress');
+                if (progress) {
+                    const savedProgress = JSON.parse(progress);
+                    maxUnlockedLevel = savedProgress.maxUnlockedLevel || 1;
+                    currentLevel = savedProgress.currentLevel || 1;
+                    completedLevels = savedProgress.completedLevels || [];
+                }
+                
+                // Load current game
+                const savedGame = localStorage.getItem('romanticMemoryGame');
+                if (savedGame) {
+                    gameState = JSON.parse(savedGame);
+                }
+            }
+            
+            // Create floating rose petals
+            function createRosePetals() {
+                const container = document.body;
+                const petalCount = 15;
+                
+                for (let i = 0; i < petalCount; i++) {
+                    const petal = document.createElement('div');
+                    petal.className = 'rose-petal';
+                    petal.style.backgroundImage = 'url("https://www.transparentpng.com/thumb/rose/flower-rose-png-clipart-7.png")';
+                    
+                    // Random size and position
+                    const size = Math.random() * 40 + 30;
+                    petal.style.width = `${size}px`;
+                    petal.style.height = `${size}px`;
+                    petal.style.left = `${Math.random() * 100}%`;
+                    petal.style.top = `${Math.random() * -20}%`;
+                    
+                    // Animation
+                    const duration = Math.random() * 15 + 15;
+                    petal.style.animation = `float ${duration}s linear infinite`;
+                    petal.style.animationDelay = `${Math.random() * 5}s`;
+                    
+                    // Add to DOM
+                    container.appendChild(petal);
+                    
+                    // Create keyframes dynamically
+                    if (i === 0) {
+                        const style = document.createElement('style');
+                        style.innerHTML = `
+                            @keyframes float {
+                                0% {
+                                    transform: translate(0, 0) rotate(0deg);
+                                    opacity: 0.7;
+                                }
+                                50% {
+                                    opacity: 1;
+                                }
+                                100% {
+                                    transform: translate(${Math.random() * 200 - 100}px, ${window.innerHeight + 100}px) rotate(${Math.random() * 360}deg);
+                                    opacity: 0;
+                                }
+                            }
+                        `;
+                        document.head.appendChild(style);
+                    }
+                }
+            }
+            
+            // Initialize the game
+            initGame();
+        });
+    </script>
+</body>
+</html>
